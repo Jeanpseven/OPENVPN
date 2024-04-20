@@ -1,5 +1,13 @@
 import os
 import random
+import tempfile
+
+def create_auth_file():
+    # Cria um arquivo temporário para armazenar as credenciais
+    auth_file = tempfile.NamedTemporaryFile(mode='w', delete=False)
+    auth_file.write("vpnbook\nemw79zs")
+    auth_file.close()
+    return auth_file.name
 
 def connect_to_vpn(server_number=None):
     # Lista os diretórios de servidores disponíveis
@@ -32,11 +40,17 @@ def connect_to_vpn(server_number=None):
     # Caminho completo para o arquivo de configuração
     ovpn_path = os.path.join(server, ovpn_file)
 
-    # Comando para conectar ao VPN usando o arquivo de configuração
-    command = f"openvpn --config {ovpn_path} --auth-user-pass <(echo 'vpnbook\nemw79zs')"
+    # Cria o arquivo temporário com as credenciais
+    auth_file = create_auth_file()
+
+    # Comando para conectar ao VPN usando o arquivo de configuração e o arquivo de autenticação
+    command = f"openvpn --config {ovpn_path} --auth-user-pass {auth_file} --cipher AES-256-GCM --inactive 3600"
 
     # Executa o comando
     os.system(command)
+
+    # Remove o arquivo temporário após a conexão
+    os.unlink(auth_file)
 
 # Exemplo de uso
 print("1. Conectar aleatoriamente")
