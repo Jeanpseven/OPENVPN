@@ -10,7 +10,7 @@ def create_auth_file():
     auth_file.close()
     return auth_file.name
 
-def create_ovpn_config(server):
+def connect_to_vpn(server):
     # Lista os arquivos de configuração .ovpn no diretório do servidor
     ovpn_files = [file for file in os.listdir(server) if file.endswith(".ovpn")]
     if not ovpn_files:
@@ -26,15 +26,14 @@ def create_ovpn_config(server):
     # Cria o arquivo temporário com as credenciais
     auth_file = create_auth_file()
 
-    # Caminho para o arquivo de saída
-    output_path = "vpn_config.ovpn"
+    # Comando para conectar ao VPN usando o arquivo de configuração e o arquivo de autenticação
+    command = f"openvpn --config {ovpn_path} --auth-user-pass {auth_file} --cipher AES-256-GCM --inactive 3600"
 
-    # Escreve o conteúdo do arquivo de configuração
-    with open(output_path, "w") as output_file:
-        output_file.write(f"auth-user-pass {auth_file}\n")
-        output_file.write(open(ovpn_path).read())
+    # Executa o comando
+    os.system(command)
 
-    return output_path
+    # Remove o arquivo temporário após a conexão
+    os.unlink(auth_file)
 
 def VPNLoopChange():
     while True:
@@ -49,15 +48,12 @@ def VPNLoopChange():
         # Escolhe aleatoriamente um servidor
         server = random.choice(servers)
 
-        # Cria o arquivo de configuração .ovpn
-        config_path = create_ovpn_config(server)
-
         # Conecta ao VPN
         print(f"Conectando ao servidor: {server}")
-        os.system(f"openvpn --config {config_path}")
+        connect_to_vpn(server)
 
-        # Aguarda 5 segundos antes de trocar de servidor
-        time.sleep(5)
+        # Aguarda 10 segundos antes de trocar de servidor
+        time.sleep(10)
 
 # Exemplo de uso
 VPNLoopChange()
