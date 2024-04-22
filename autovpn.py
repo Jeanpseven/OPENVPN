@@ -23,7 +23,7 @@ def create_vpn_change_script():
     script_file.write("  fi\n")
     script_file.write("  server=$(echo \"$servers\" | shuf -n 1)\n")
     script_file.write("  echo \"Conectando ao servidor: $server\"\n")
-    script_file.write(f"  openvpn --config $server/*.ovpn --auth-user-pass {create_auth_file()} --cipher AES-256-GCM --inactive 3600\n")
+    script_file.write(f"  openvpn --config \"$server\"/*.ovpn --auth-user-pass {create_auth_file()} --cipher AES-256-GCM --inactive 3600 &\n")
     script_file.write("  sleep 5\n")
     script_file.write("done\n")
     script_file.close()
