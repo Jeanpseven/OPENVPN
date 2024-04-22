@@ -32,24 +32,29 @@ def create_vpn_change_script():
     return script_file.name
 
 def change_vpn_and_ip():
-    # Cria o script de mudança de VPN
-    vpn_change_script = create_vpn_change_script()
-
-    # Inicia o script de mudança de VPN em um subprocesso
-    vpn_process = subprocess.Popen(["bash", vpn_change_script])
-
     while True:
-        # Espera 5 segundos antes de matar e reiniciar o processo subprocesso
-        time.sleep(5)
-
-        # Mata o processo subprocesso atual
-        vpn_process.kill()
-
-        # Cria um novo script de mudança de VPN
+        # Cria o script de mudança de VPN
         vpn_change_script = create_vpn_change_script()
 
-        # Inicia um novo processo subprocesso com o novo script
-        vpn_process = subprocess.Popen(["bash", vpn_change_script])
+        # Inicia o novo processo em segundo plano
+        subprocess.Popen(["bash", vpn_change_script])
+
+        # Espera 5 segundos antes de matar o processo atual e continuar
+        time.sleep(5)
+
+        # Obtém o PID do processo atual
+        with open("vpn_pid.txt", "r") as file:
+            current_pid = int(file.read())
+
+        # Mata o processo atual
+        os.system(f"kill {current_pid}")
+
+        # Obtém o PID do novo processo
+        new_pid = subprocess.check_output(["pgrep", "-f", vpn_change_script]).decode().strip()
+
+        # Salva o PID do novo processo
+        with open("vpn_pid.txt", "w") as file:
+            file.write(new_pid)
 
 # Exemplo de uso
 change_vpn_and_ip()
