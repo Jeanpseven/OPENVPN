@@ -1,4 +1,5 @@
 import requests
+import random
 import time
 
 proxies = [
@@ -25,12 +26,12 @@ proxies = [
 ]
 
 def change_ip():
-    for proxy in proxies:
-        try:
-            r = requests.get('http://icanhazip.com', proxies=proxy)
-            print("Novo IP:", r.text.strip())
-        except Exception as e:
-            print("Erro ao mudar o IP:", e)
+    proxy = random.choice(proxies)
+    try:
+        r = requests.get('http://icanhazip.com', proxies=proxy, timeout=10)
+        print("Novo IP:", r.text.strip())
+    except Exception as e:
+        print("Erro ao mudar o IP:", e)
 
 if __name__ == "__main__":
     try:
