@@ -1,15 +1,43 @@
-import subprocess
+import random
 import time
+import signal
 
-while True:
-    # Inicia o processo do script vpn.py
-    vpn_process = subprocess.Popen(["python3", "vpn.py"])
+def change_ip_to_random():
+    global interrupted
+    interrupted = False
 
-    # Espera 5 segundos
-    time.sleep(5)
+    while True:
+        if interrupted:
+            break
 
-    # Mata o processo do script vpn.py
-    vpn_process.terminate()
+        # Change IP to a random value here
+        random_ip = random.choice(available_proxies)
+        print(f"Changed IP to: {random_ip}")
 
-    # Aguarda um momento para garantir que o processo seja encerrado
-    time.sleep(1)
+        # Wait for 5 seconds
+        time.sleep(5)
+
+    # Restore the original IP here
+    set_ip(original_ip)
+    print("IP restored to the original value.")
+
+def signal_handler(signal, frame):
+    global interrupted
+    interrupted = True
+    print("Exiting...")
+
+def main():
+    # Initialize variables
+    global available_proxies, original_ip, interrupted
+    original_ip = get_original_ip()
+    available_proxies = get_available_proxies()
+    interrupted = False
+
+    # Set up signal handler
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # Change IP to random
+    change_ip_to_random()
+
+if __name__ == "__main__":
+    main()
